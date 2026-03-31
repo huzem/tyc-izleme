@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitit Üniversitesi | TYÇ 6. Seviye (Lisans) Jenerik Program Çıktılarının İzlenmesi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --hitit-red: #7F0018;
+            --hitit-gold: #AC9058;
+            --hitit-silver: #C6BAB5;
+            --hitit-light: #f8f9fa;
+            --hitit-dark: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--hitit-dark);
+            background-color: #fdfdfd;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- ŞİFRELEME PANELİ STİLLERİ --- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--hitit-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-box {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--hitit-red);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box i { font-size: 3rem; color: var(--hitit-gold); margin-bottom: 1rem; }
+        .login-box h2 { color: var(--hitit-red); margin-bottom: 1.5rem; border: none; font-size: 1.4rem; }
+        
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid var(--hitit-silver);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            text-align: center;
+        }
+
+        .login-box input:focus { border-color: var(--hitit-gold); }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--hitit-red);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-box button:hover { background-color: #5a0011; }
+        .error-msg { color: #d9534f; font-size: 0.9rem; margin-top: 0.5rem; display: none; font-weight: 600; }
+
+        /* Ana İçerik Başlangıçta Gizli */
+        #main-content { display: none; }
+
+        /* --- SAYFA İÇERİK STİLLERİ --- */
+        header {
+            background-color: var(--hitit-red);
+            padding: 1.5rem 0;
+            border-bottom: 5px solid var(--hitit-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .header-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 2rem;
+        }
+
+        .logo-box {
+            background-color: white;
+            padding: 10px 25px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .logo-box img { height: 75px; width: auto; }
+        .header-title { color: white; }
+        .header-title h1 { margin: 0; font-size: 1.1rem; font-weight: 700; line-height: 1.3; }
+        .container { max-width: 1000px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--hitit-gold);
+        }
+        h2 { color: var(--hitit-red); border-bottom: 2px solid var(--hitit-silver); padding-bottom: 0.5rem; margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .dropdown-container { margin: 1.5rem 0; display: flex; flex-direction: column; gap: 8px; }
+        select { padding: 12px; border-radius: 6px; border: 2px solid var(--hitit-gold); font-size: 1rem; font-weight: 600; color: var(--hitit-red); cursor: pointer; outline: none; }
+        #canva-preview { width: 100%; margin-top: 1.5rem; border-radius: 8px; overflow: hidden; transition: all 0.5s ease; }
+        footer { text-align: center; padding: 3rem 1rem; color: #777; font-size: 0.9rem; border-top: 1px solid var(--hitit-silver); margin-top: 2rem; }
+
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .header-title h1 { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ŞİFRE GİRİŞ PANELİ -->
+<div id="login-overlay">
+    <div class="login-box">
+        <i class="fas fa-shield-halved"></i>
+        <h2>Rapor Görüntülüme</h2>
+        <p>Devam etmek için lütfen erişim şifresini giriniz.</p>
+        <input type="password" id="sifre-input" placeholder="••••••••" onkeypress="handleKeyPress(event)">
+        <button onclick="checkPassword()">Sisteme Giriş</button>
+        <p id="error-text" class="error-msg"><i class="fas fa-exclamation-triangle"></i> Geçersiz şifre, lütfen tekrar deneyiniz.</p>
+    </div>
+</div>
+
+<!-- ANA İÇERİK -->
+<div id="main-content">
+    <header>
+        <div class="header-container">
+            <div class="logo-box">
+                <img src="https://hitit.edu.tr/images/HititLogoYeni.svg" alt="Hitit Üniversitesi">
+            </div>
+            <div class="header-title">
+                <h1>Hitit Üniversitesi Uzaktan Eğitim Uygulama ve Araştırma Merkezi <br> TYÇ 6. Seviye (Lisans) Jenerik Program Çıktılarının İzlenmesi</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="card">
+            <h2><i class="fas fa-chart-line"></i> TYÇ 6. Seviye (Lisans) Jenerik Program Çıktılarının İzlenmesine İlişkin Raporlar</h2>
+            <div class="dropdown-container">
+                <label for="birim-select">Lütfen raporunu görmek istediğiniz akademik birimi seçiniz:</label>
+                <select id="birim-select" onchange="updateCanva()">
+                    <option value="">-- Bir Birim Seçin --</option>
+                    <option value="rapor1">İnsan ve Toplum Bilimleri Fakültesi</option>
+                    <option value="rapor2">Mühendislik ve Doğa Bilimleri Fakültesi</option>
+                    <option value="rapor3">İktisadi ve İdari Bilimler Fakültesi</option>
+                    <option value="rapor4">İlahiyat Fakültesi</option>
+                    <option value="rapor5">Güzel Sanatlar, Tasarım ve Mimarlık Fakültesi</option>
+                    <option value="rapor6">Sağlık Bilimleri Fakültesi</option>
+                    <option value="rapor7">Spor Bilimleri Fakültesi</option>
+                </select>
+            </div>
+            <div id="canva-preview">
+                <p style="text-align: center; color: #666; padding: 50px; border: 2px dashed var(--hitit-silver); border-radius: 8px;">
+                    <i class="fas fa-mouse-pointer"></i> Raporu görmek için lütfen yukarıdan bir akademik birim seçiniz.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        &copy; 2026 Hitit Üniversitesi - Uzaktan Eğitim Uygulama ve Araştırma Merkezi <br>
+        Tüm hakları saklıdır.
+    </footer>
+</div>
+
+<script>
+    /* 
+       GÜVENLİK NOTU: 
+       Şifre Base64 formatında saklanmaktadır (hitituzem2026). 
+       Bu yöntem basit denetimleri engeller ancak profesyonel bir koruma değildir.
+    */
+    const k = "aGl0aXR1emVtMjAyNg=="; 
+
+    function checkPassword() {
+        const input = document.getElementById("sifre-input").value;
+        const error = document.getElementById("error-text");
+        const overlay = document.getElementById("login-overlay");
+        const content = document.getElementById("main-content");
+
+        // Girdi btoa (base64 encode) edilerek karşılaştırılır
+        if (btoa(input) === k) {
+            overlay.style.display = "none";
+            content.style.display = "block";
+        } else {
+            error.style.display = "block";
+            document.getElementById("sifre-input").value = "";
+            document.getElementById("sifre-input").focus();
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            checkPassword();
+        }
+    }
+
+    // --- MEVCUT CANVA FONKSİYONU ---
+    function updateCanva() {
+        const select = document.getElementById('birim-select');
+        const preview = document.getElementById('canva-preview');
+        const value = select.value;
+
+        const links = {
+            "rapor1": "https://www.canva.com/design/DAG727AIsMQ/6fscez87ZWv1if_YgYAPLQ/view?embed",
+            "rapor2": "https://www.canva.com/design/DAG7kR5EyAE/LPMixcqMOpb6HSoctGAHog/view?embed",
+            "rapor3": "https://www.canva.com/design/DAG73LY_Xec/Ih0ub-47XtwK0U4YZnkiNg/view?embed",
+            "rapor4": "https://www.canva.com/design/DAG73fZ-NOw/MhEstLFYK0jbnVWY42MB6Q/view?embed",
+            "rapor5": "https://www.canva.com/design/DAG72hxH3UM/szZO-_e2eYU-XoFNz7cmQA/view?embed",
+            "rapor6": "https://www.canva.com/design/DAG7LvZnay0/dMBSqXrBNzWxVkNj5b6YjQ/view?embed",
+            "rapor7": "https://www.canva.com/design/DAG73WGm070/zSjwPun9V8TpZhrZTYWEvw/view?embed"
+        };
+
+        if (value && links[value]) {
+            preview.innerHTML = `
+                <div style="position: relative; width: 100%; height: 0; padding-top: 141.4286%; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden; border-radius: 8px; will-change: transform;">
+                    <iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;"
+                        src="${links[value]}" allowfullscreen="allowfullscreen" allow="fullscreen">
+                    </iframe>
+                </div>`;
+        } else {
+            preview.innerHTML = `
+                <p style="text-align: center; color: #666; padding: 50px; border: 2px dashed #C6BAB5; border-radius: 8px;">
+                    <i class="fas fa-mouse-pointer"></i> Lütfen önizleme için yukarıdan bir birim seçiniz.
+                </p>`;
+        }
+    }
+</script>
+
+</body>
+</html>
